@@ -1,0 +1,31 @@
+# Packages #
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+
+# Media extensions #
+*.jpg
+*.gif
+*.png
+*.svg
+*.ico
+
+*.pyc
+
+# Directories
+venv/
+outputs/
+
+# OS generated files #
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
