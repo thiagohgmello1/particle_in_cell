@@ -1,25 +1,25 @@
-from figures.image import Image
-from figures.primitive_figures import PrimitiveFigures
+from geometry.topology import Topology
+from geometry.primitive_geometries import PrimitiveGeometries
 from graphics.window import Window
+from materials.material import Material
 import numpy as np
 
 if __name__ == '__main__':
-    image = Image()
-    window = Window(image)
-    primitive_figures = PrimitiveFigures(image)
-    a = [100, 200]
-    b = [200, 200]
-    c = [100, 100]
-    d = [200, 100]
-    e = [250, 160]
-    f = [250, 140]
-    g = [250, 200]
-    h = [250, 100]
-    i = [350, 200]
-    j = [350, 100]
-    contours = np.array([a, b, e, g, i, j, h, f, d, c])
-    # primitive_figures.line((50, 50), (100, 50))
-    primitive_figures.circle((200, 200), 50)
-    # primitive_figures.filled_non_convex_polygon([contours])
-    window.zoom_control()
+    topology = Topology()
+    window = Window(topology)
+    primitive_figures = PrimitiveGeometries(topology)
+    a = [1, 1]
+    b = [1, 6]
+    c = [4, 6]
+    d = [4, 1]
+    e = [6, 4]
+    f = [6, 3]
+    g = [6, 6]
+    h = [6, 1]
+    i = [10, 1]
+    j = [10, 6]
+    contours = np.array([a, b, c, e, g, j, i, h, f, d])
+    # primitive_figures.circle((10, 10), 100)
+    material = Material(10, color=150)
+    primitive_figures.filled_non_convex_polygon([contours], color=material.color)
     window.create_window('Diode')
