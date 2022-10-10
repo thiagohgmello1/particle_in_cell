@@ -20,6 +20,7 @@
 # Directories
 venv/
 outputs/
+.idea/
 
 # OS generated files #
 .DS_Store

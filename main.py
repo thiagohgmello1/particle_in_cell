@@ -21,5 +21,5 @@ if __name__ == '__main__':
     contours = np.array([a, b, c, e, g, j, i, h, f, d])
     # primitive_figures.circle((10, 10), 100)
     material = Material(10, color=150)
-    primitive_figures.filled_non_convex_polygon([contours], color=material.color)
+    primitive_figures.filled_non_convex_polygon([contours], material=material)
     window.create_window('Diode')
