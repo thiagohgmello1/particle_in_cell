@@ -70,8 +70,8 @@ class Particle:
 
     def boundary_collision(self, delta_t, position, velocity):
         collision = False
-        new_position = position + velocity * delta_t
-        new_velocity = velocity
+        new_position = (position + velocity * delta_t).astype(int)
+        new_velocity = np.copy(velocity)
         new_delta_t = delta_t
         if new_position[0] > self.topology.resolution[0]:
             normal_versor = np.array([-1, 0])
@@ -84,18 +84,24 @@ class Particle:
             new_delta_t = -position[0] / velocity[0]
             new_velocity = velocity - 2 * (np.dot(velocity, normal_versor)) * normal_versor
         if new_position[1] > self.topology.resolution[1] and \
-                new_delta_t > (self.topology.resolution[1] - position[1]) / velocity[1]:
-            new_delta_t = (self.topology.resolution[1] - position[1]) / velocity[1]
+                new_delta_t >= (self.topology.resolution[1] - position[1]) / velocity[1]:
             normal_versor = np.array([0, -1])
             collision = True
-            new_velocity = velocity - 2 * (np.dot(velocity, normal_versor)) * normal_versor
-        elif new_position[1] < 0 and new_delta_t > -position[1] / velocity[1]:
+            if new_delta_t > (self.topology.resolution[1] - position[1]) / velocity[1]:
+                new_velocity = velocity - 2 * (np.dot(velocity, normal_versor)) * normal_versor
+            else:
+                new_velocity[1] = (velocity - 2 * (np.dot(velocity, normal_versor)) * normal_versor)[1]
+            new_delta_t = (self.topology.resolution[1] - position[1]) / velocity[1]
+        elif new_position[1] < 0 and new_delta_t >= -position[1] / velocity[1]:
             normal_versor = np.array([0, 1])
             collision = True
+            if new_delta_t > (self.topology.resolution[1] - position[1]) / velocity[1]:
+                new_velocity = velocity - 2 * (np.dot(velocity, normal_versor)) * normal_versor
+            else:
+                new_velocity[1] = (velocity - 2 * (np.dot(velocity, normal_versor)) * normal_versor)[1]
             new_delta_t = -position[1] / velocity[1]
-            new_velocity = velocity - 2 * (np.dot(velocity, normal_versor)) * normal_versor
 
-        new_position = position + velocity * new_delta_t
+        new_position = (position + velocity * new_delta_t).astype(int)
         delta_t = delta_t - new_delta_t
         self.positions.append(new_position.astype(int))
 

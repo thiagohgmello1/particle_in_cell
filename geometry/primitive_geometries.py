@@ -21,19 +21,19 @@ class PrimitiveGeometries:
             self.line(points[count], points[count + 1], material, thickness)
 
 
-    def arrow(self, points: list, material: Material, thickness=1):
+    def arrow(self, points: list, material: Material, thickness=1, tip_length=5):
         for count in range(len(points) - 1):
             init_point = points[count]
             end_point = points[count + 1]
             arrow_size = np.linalg.norm(end_point - init_point)
-            tip_length = 5 / arrow_size
+            tip = tip_length / arrow_size
             cv2.arrowedLine(
                 self.topology.geometry,
                 init_point,
                 end_point,
                 color=material.color,
                 thickness=thickness,
-                tipLength=tip_length
+                tipLength=tip
             )
 
 

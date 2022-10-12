@@ -5,7 +5,7 @@ from particles.particle import Particle
 import numpy as np
 
 if __name__ == '__main__':
-    particle = Particle(1, 1, np.array([14, 6]), np.array([13, -123]))
+    particle = Particle(1, 1, np.array([10, 10]), np.array([152, 99]))
     topology = Topology(particles=[particle])
     window = Window(topology)
     a = [1, 1]
