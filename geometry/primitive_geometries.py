@@ -8,11 +8,11 @@ class PrimitiveGeometries:
     def __init__(self, topology):
         self.topology = topology
 
-    def line(self, init_point: np.array, end_point: np.array, material: Material, thickness=1):
-        # init_point, end_point = [
-        #     vec_real_to_matrix(self.topology.convert_factor, point) for point in [init_point, end_point]
-        # ]
-        cv2.line(self.topology.geometry, init_point, end_point, color=material.color, thickness=thickness)
+    def line(self, init_point: np.array, end_point: np.array, material: Material, thickness=1, geometry=None):
+        if not geometry:
+            cv2.line(self.topology.geometry, init_point, end_point, color=material.color, thickness=thickness)
+        else:
+            cv2.line(geometry, init_point, end_point, color=material.color, thickness=thickness)
         return np.array([init_point, end_point])
 
 

@@ -1,3 +1,4 @@
+import cv2
 import numpy as np
 from utils.converters import vec_real_to_matrix, scalar_real_to_matrix
 
@@ -9,7 +10,7 @@ class Particle:
             charge: float,
             init_pos: np.array,
             init_velocity: np.array,
-            size: float = 1,
+            size: float = 0,
             density: float = 1
     ):
         self.positions = []
@@ -20,10 +21,12 @@ class Particle:
         self.size = size
         self.density = density
         self.topology = None
+        self.box = None
 
 
     def set_topology(self, topology):
         self.topology = topology
+        self.box = np.zeros(self.topology.geometry.shape)
         self._convert_particle_to_matrix()
 
 
@@ -64,8 +67,26 @@ class Particle:
 
 
     def collision(self, delta_t, position, velocity):
-        delta_t, position, velocity, collision = self.boundary_collision(delta_t, position, velocity)
-        return delta_t, position, velocity, collision
+        d_t, pos, vel, coll_bdy = self.boundary_collision(delta_t, position, velocity)
+        d_t, pos, vel, coll_tly = self.topology_collision(delta_t, position, pos, velocity)
+        return d_t, pos, vel, coll_tly
+
+
+    def topology_collision(self, delta_t, init_point, end_point, velocity):
+        # points = np.array([init_point, end_point])
+        cv2.line(self.box, init_point, end_point, color=(1, 1, 1), thickness=1)
+        # aux_box = self.box[
+        #           np.min(points[:, 1]):np.max(points[:, 1])+1, np.min(points[:, 0]):np.max(points[:, 0])+1
+        #           ]
+        # edges = self.topology.edges[
+        #         np.min(points[:, 1]):np.max(points[:, 1])+1, np.min(points[:, 0]):np.max(points[:, 0])+1
+        #         ]
+        edges = np.multiply(self.box, self.topology.edges)
+        edges = edges / np.amax(edges)
+        contact_points = np.transpose(np.nonzero(edges))
+        if contact_points.size == 0:
+            return delta_t, end_point, velocity, False
+        return delta_t, end_point, velocity, False
 
 
     def boundary_collision(self, delta_t, position, velocity):
