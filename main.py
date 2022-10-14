@@ -5,7 +5,7 @@ from particles.particle import Particle
 import numpy as np
 
 if __name__ == '__main__':
-    particle = Particle(1, 1, np.array([10, 10]), np.array([-7, -10]))
+    particle = Particle(1, 1, np.array([8, 10]), np.array([-10, -10]))
     topology = Topology(particles=[particle])
     window = Window(topology)
     # a = [1, 1]
@@ -26,7 +26,7 @@ if __name__ == '__main__':
     d = [6, 2]
     contours = np.array([a, b, c, d])
     material_draw = Material(1)
-    topology.drawer.circle(np.array([6, 6]), 1, material)
+    topology.drawer.circle(np.array([4, 6]), 1, material)
     # topology.drawer.line([0, 0], [10, 10], material)
     topology.drawer.filled_polygon([contours], material=material)
     topology.get_edges()

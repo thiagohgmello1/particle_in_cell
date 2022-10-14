@@ -1,6 +1,8 @@
 import cv2
 import numpy as np
-from utils.converters import vec_real_to_matrix, scalar_real_to_matrix
+import matplotlib.pyplot as plt
+from sklearn.neighbors import NearestNeighbors
+from utils.converters import vec_real_to_matrix, scalar_real_to_matrix, rotate_matrix
 
 
 class Particle:
@@ -73,20 +75,42 @@ class Particle:
 
 
     def topology_collision(self, delta_t, init_point, end_point, velocity):
-        # points = np.array([init_point, end_point])
+        collision, normal_vector, collision_point = self.find_collision_point(init_point, end_point, velocity)
+        if not collision:
+            return delta_t, end_point, velocity, False
+        delta_t, end_point, velocity = self.calc_new_parameters(
+            delta_t, init_point, collision_point, velocity, normal_vector
+        )
+        return delta_t, end_point, velocity, False
+
+
+    def find_collision_point(self, init_point, end_point, velocity):
+        edge_points = np.transpose(np.nonzero(self.topology.edges))
         cv2.line(self.box, init_point, end_point, color=(1, 1, 1), thickness=1)
-        # aux_box = self.box[
-        #           np.min(points[:, 1]):np.max(points[:, 1])+1, np.min(points[:, 0]):np.max(points[:, 0])+1
-        #           ]
-        # edges = self.topology.edges[
-        #         np.min(points[:, 1]):np.max(points[:, 1])+1, np.min(points[:, 0]):np.max(points[:, 0])+1
-        #         ]
         edges = np.multiply(self.box, self.topology.edges)
-        edges = edges / np.amax(edges)
+        edges = edges / np.amax(edges, initial=1)
         contact_points = np.transpose(np.nonzero(edges))
         if contact_points.size == 0:
-            return delta_t, end_point, velocity, False
-        return delta_t, end_point, velocity, False
+            return False, None, None
+        distance_from_init_point = np.linalg.norm(contact_points - init_point, axis=1)
+        collision_point = contact_points[np.argmin(distance_from_init_point)]
+        closer_point_index = np.where(np.all(edge_points == collision_point, axis=1) == True)[0][0]
+        neighbors = NearestNeighbors(n_neighbors=3, algorithm='ball_tree').fit(edge_points)
+        distances, indices = neighbors.kneighbors(edge_points)
+        closer_points = edge_points[indices[closer_point_index, 1:]]
+        normal_vector = np.matmul(rotate_matrix(90), closer_points[0] - closer_points[1])
+        if np.dot(normal_vector, velocity) > 0:
+            normal_vector = np.matmul(rotate_matrix(180), normal_vector)
+        return True, normal_vector, collision_point
+
+    @staticmethod
+    def calc_new_parameters(delta_t, init_point, collision_point, velocity, normal_vector):
+        time_to_collision = np.min((collision_point - init_point) / velocity)
+        remaining_time = delta_t - time_to_collision
+        new_velocity = velocity - 2 * (np.dot(velocity, normal_vector)) / \
+                       (np.linalg.norm(normal_vector) ** 2) * normal_vector
+
+        return remaining_time, collision_point, new_velocity
 
 
     def boundary_collision(self, delta_t, position, velocity):
