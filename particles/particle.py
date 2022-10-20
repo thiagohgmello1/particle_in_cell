@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy import spatial
 from sklearn.neighbors import NearestNeighbors
 from utils.converters import vec_real_to_matrix, scalar_real_to_matrix, rotate_matrix
 
@@ -94,16 +95,17 @@ class Particle:
         box = self.box.copy()
 
         cv2.line(box, init_point, end_point, color=(1, 1, 1), thickness=1)
-        edges = np.multiply(box, self.topology.edges)
-        edges = edges / np.amax(edges, initial=1)
+        edges = np.multiply(box, self.topology.geometry)
+        edges = (edges / np.amax(edges, initial=1)).astype(int)
         contact_points = np.flip(np.transpose(np.nonzero(edges)), 1)
         contact_points = contact_points[np.where(np.not_equal(contact_points, init_point).all(1))[0], :]
         if contact_points.size == 0:
             return False, None, None
+        contact_points = np.array([contact_points[0], contact_points[-1]])
         distance_from_init_point = np.linalg.norm(contact_points - init_point, axis=1)
         collision_point = contact_points[np.argmin(distance_from_init_point)]
+        collision_point = self.get_collision_point(self.topology.edges, init_point, collision_point)
         normal_vector = self.get_normal_vector(edge_points, collision_point, velocity)
-        # collision_point = self.get_collision_point(box, init_point, collision_point)
         return True, normal_vector, collision_point
 
     def get_normal_vector(self, edge_points, collision_point, velocity):
@@ -117,17 +119,14 @@ class Particle:
     def get_collision_point(self, box, init_point, collision_point):
         particle_path = np.transpose(np.nonzero(box))
         closer_points = self.get_closer_points(particle_path, collision_point)
-        geometry_values = [self.topology.geometry[tuple(pos)] for pos in closer_points]
         desired_point = closer_points[np.argmin([self.topology.geometry[tuple(pos)] for pos in closer_points])]
-        if geometry_values[0] == geometry_values[1]:
-            desired_point = closer_points[np.argmin(np.linalg.norm(closer_points - init_point, axis=1))]
         return desired_point
 
 
     @staticmethod
     def get_closer_points(geometry, desired_point):
         desired_point = np.flip(desired_point)
-        closer_point_index = np.where(np.all(geometry == desired_point, axis=1) == True)[0][0]
+        closer_point_index = spatial.KDTree(geometry).query(desired_point)[1]
         neighbors = NearestNeighbors(n_neighbors=3, algorithm='ball_tree').fit(geometry)
         distances, indices = neighbors.kneighbors(geometry)
         return np.flip(geometry[indices[closer_point_index, 1:]], 1)

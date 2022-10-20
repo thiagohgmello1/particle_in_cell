@@ -18,12 +18,12 @@ class Topology:
         self.box_size = np.array([x_box, y_box])
         self.resolution = np.array([x_resolution, y_resolution])
         self.unit = self.convert_unit(scale)
-        self.geometry = np.ones((x_resolution, y_resolution), dtype="uint8")
+        self.geometry = np.ones((x_resolution, y_resolution), dtype="uint8") * 255
         self.edges = np.zeros((x_resolution, y_resolution), dtype="uint8")
         self.convert_factor = np.divide(self.resolution, self.box_size)
         self.drawer = PrimitiveGeometries(self)
         size = np.multiply(self.box_size, self.convert_factor).astype(int) - 1
-        self.drawer.rectangle(np.array([0, 0]), size, (255, 255, 255))
+        # self.drawer.rectangle(np.array([0, 0]), size, (255, 255, 255))
         self.particles = particles
         self.set_particles_topology()
 
