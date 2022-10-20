@@ -2,11 +2,14 @@ from geometry.topology import Topology
 from graphics.window import Window
 from materials.material import Material
 from particles.particle import Particle
+import matplotlib.pyplot as plt
 import numpy as np
 
 if __name__ == '__main__':
-    particle = Particle(1, 1, np.array([8, 10]), np.array([-10, -10]))
+    particle = Particle(1, 1)
     topology = Topology(particles=[particle])
+    #                                                      x   y               vx   vy
+    topology.particles[0].set_initial_conditions(np.array([3.5, 5]), np.array([-21, -36]))
     window = Window(topology)
     # a = [1, 1]
     # b = [1, 6]
@@ -20,16 +23,18 @@ if __name__ == '__main__':
     # j = [10, 6]
     # contours = np.array([a, b, c, e, g, j, i, h, f, d])
     material = Material(10, color=255)
-    a = [2, 2]
-    b = [2, 6]
+    a = [1, 1]
+    b = [1, 6]
     c = [6, 6]
-    d = [6, 2]
+    d = [6, 1]
     contours = np.array([a, b, c, d])
-    material_draw = Material(1)
-    topology.drawer.circle(np.array([4, 6]), 1, material)
-    # topology.drawer.line([0, 0], [10, 10], material)
+    material_draw = Material(1, color=60)
+    # topology.drawer.circle(np.array([4, 6]), 3, material)
+    # topology.drawer.line([1, 1], [1, 18], material)
+    # topology.drawer.line([3, 1], [3, 16], material)
     topology.drawer.filled_polygon([contours], material=material)
     topology.get_edges()
     particle.move(delta_t=1)
-    topology.insert_particles(material, 'arrow')
+    topology.insert_particles(material_draw, 'arrow')
+    print(particle.positions / topology.convert_factor)
     window.create_window('Diode')

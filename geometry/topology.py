@@ -13,15 +13,17 @@ class Topology:
             x_resolution: int = 400,
             y_resolution: int = 400,
             particles: list[Particle] = None,
-            unit: str = 'nm'
+            scale: str = 'n'
     ):
         self.box_size = np.array([x_box, y_box])
         self.resolution = np.array([x_resolution, y_resolution])
-        self.unit = self.convert_unit(unit)
+        self.unit = self.convert_unit(scale)
         self.geometry = np.ones((x_resolution, y_resolution), dtype="uint8")
         self.edges = np.zeros((x_resolution, y_resolution), dtype="uint8")
         self.convert_factor = np.divide(self.resolution, self.box_size)
         self.drawer = PrimitiveGeometries(self)
+        size = np.multiply(self.box_size, self.convert_factor).astype(int) - 1
+        self.drawer.rectangle(np.array([0, 0]), size, (255, 255, 255))
         self.particles = particles
         self.set_particles_topology()
 
@@ -53,5 +55,5 @@ class Topology:
 
     @staticmethod
     def convert_unit(unit: str):
-        units_dict = {'m': 1, 'mm': 1e-3, 'um': 1e-6, 'nm': 1e-9, 'pm': 1e-12}
-        return units_dict.get(unit, 1e-6)
+        units_dict = {'1': 1, 'm': 1e-3, 'u': 1e-6, 'n': 1e-9, 'p': 1e-12}
+        return units_dict.get(unit, 1e-9)
