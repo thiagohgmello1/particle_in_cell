@@ -98,7 +98,7 @@ class Particle:
 
         cv2.line(box, init_point, end_point, color=(1, 1, 1), thickness=1)
         internal_path = np.multiply(box, self.topology.geometry)
-        external_path = np.multiply(box, self.topology.geometry * 255)
+        external_path = np.multiply(box, self.topology.geometry)
         internal_path = (internal_path / np.amax(internal_path, initial=1)).astype(int)
         external_path = (external_path / np.amax(external_path, initial=1)).astype(int)
         contact_points = np.flip(np.transpose(np.nonzero(external_path)), 1)
@@ -113,17 +113,19 @@ class Particle:
 
     def get_normal_vector(self, edge_points, collision_point, velocity):
         closer_points = self.get_closer_points(edge_points, collision_point)
-        normal_vector = np.matmul(rotate_matrix(90), closer_points[0] - closer_points[1]).astype(int)
+        parallel_vector = closer_points[0] - closer_points[1]
+        normal_vector = np.rint(np.matmul(rotate_matrix(90), parallel_vector))
         if np.dot(normal_vector, velocity) > 0:
-            normal_vector = np.matmul(rotate_matrix(180), normal_vector).astype(int)
-        return normal_vector
+            normal_vector = np.rint(np.matmul(rotate_matrix(180), normal_vector))
+        return normal_vector.astype(int)
 
 
     def get_collision_point(self, internal_path, external_collision_point):
+        external_collision_point = np.flip(external_collision_point)
         internal_path = np.transpose(np.nonzero(internal_path))
         closer_point_index = spatial.KDTree(internal_path).query(external_collision_point)[1]
         desired_point = internal_path[closer_point_index]
-        return desired_point
+        return np.flip(desired_point)
 
 
     @staticmethod

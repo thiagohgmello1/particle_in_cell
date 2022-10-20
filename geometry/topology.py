@@ -47,7 +47,7 @@ class Topology:
 
 
     def get_edges(self):
-        ret, thresh_img = cv2.threshold(self.geometry, 150, 255, cv2.THRESH_BINARY)
+        ret, thresh_img = cv2.threshold(self.geometry, 10, 255, cv2.THRESH_BINARY)
         contours, hierarchy = cv2.findContours(
             image=thresh_img, mode=cv2.RETR_TREE, method=cv2.CHAIN_APPROX_SIMPLE
         )
