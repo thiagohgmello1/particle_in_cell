@@ -22,7 +22,7 @@ if __name__ == '__main__':
     i = [10, 1]
     j = [10, 6]
     contours = np.array([a, b, c, e, g, j, i, h, f, d])
-    material = Material(10, color=1)
+    material = Material(10, color=60)
     # a = [1, 1]
     # b = [1, 6]
     # c = [6, 6]
@@ -37,5 +37,5 @@ if __name__ == '__main__':
     particle.move(delta_t=1)
     topology.insert_particles(material_draw, 'arrow')
     print(particle.positions / topology.convert_factor)
-    print(particle.positions)
+    print(particle.velocities / topology.convert_factor)
     window.create_window('Diode')

@@ -18,7 +18,7 @@ class Topology:
         self.box_size = np.array([x_box, y_box])
         self.resolution = np.array([x_resolution, y_resolution])
         self.unit = self.convert_unit(scale)
-        self.geometry = np.ones((x_resolution, y_resolution), dtype="uint8") * 255
+        self.geometry = np.ones((x_resolution, y_resolution), dtype="uint8")
         self.edges = np.zeros((x_resolution, y_resolution), dtype="uint8")
         self.convert_factor = np.divide(self.resolution, self.box_size)
         self.drawer = PrimitiveGeometries(self)

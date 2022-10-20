@@ -16,6 +16,7 @@ class Particle:
         self.velocity = None
         self.topology = None
         self.box = None
+        self.velocities = []
 
 
     def set_topology(self, topology):
@@ -82,6 +83,7 @@ class Particle:
 
     def topology_collision(self, delta_t, init_point, end_point, velocity):
         collision, normal_vector, collision_point = self.find_collision_point(init_point, end_point, velocity)
+        self.velocities.append(velocity)
         if not collision:
             return 0, end_point, velocity, False
         delta_t, end_point, velocity = self.calc_new_parameters(
@@ -95,16 +97,17 @@ class Particle:
         box = self.box.copy()
 
         cv2.line(box, init_point, end_point, color=(1, 1, 1), thickness=1)
-        edges = np.multiply(box, self.topology.geometry)
-        edges = (edges / np.amax(edges, initial=1)).astype(int)
-        contact_points = np.flip(np.transpose(np.nonzero(edges)), 1)
-        contact_points = contact_points[np.where(np.not_equal(contact_points, init_point).all(1))[0], :]
+        internal_path = np.multiply(box, self.topology.geometry)
+        external_path = np.multiply(box, self.topology.geometry * 255)
+        internal_path = (internal_path / np.amax(internal_path, initial=1)).astype(int)
+        external_path = (external_path / np.amax(external_path, initial=1)).astype(int)
+        contact_points = np.flip(np.transpose(np.nonzero(external_path)), 1)
         if contact_points.size == 0:
             return False, None, None
         contact_points = np.array([contact_points[0], contact_points[-1]])
         distance_from_init_point = np.linalg.norm(contact_points - init_point, axis=1)
-        collision_point = contact_points[np.argmin(distance_from_init_point)]
-        collision_point = self.get_collision_point(self.topology.edges, init_point, collision_point)
+        external_collision_point = contact_points[np.argmin(distance_from_init_point)]
+        collision_point = self.get_collision_point(internal_path, external_collision_point)
         normal_vector = self.get_normal_vector(edge_points, collision_point, velocity)
         return True, normal_vector, collision_point
 
@@ -116,10 +119,10 @@ class Particle:
         return normal_vector
 
 
-    def get_collision_point(self, box, init_point, collision_point):
-        particle_path = np.transpose(np.nonzero(box))
-        closer_points = self.get_closer_points(particle_path, collision_point)
-        desired_point = closer_points[np.argmin([self.topology.geometry[tuple(pos)] for pos in closer_points])]
+    def get_collision_point(self, internal_path, external_collision_point):
+        internal_path = np.transpose(np.nonzero(internal_path))
+        closer_point_index = spatial.KDTree(internal_path).query(external_collision_point)[1]
+        desired_point = internal_path[closer_point_index]
         return desired_point
 
 
@@ -138,5 +141,4 @@ class Particle:
         remaining_time = delta_t - time_to_collision
         new_velocity = velocity - 2 * (np.dot(velocity, normal_vector)) / \
                        (np.linalg.norm(normal_vector) ** 2) * normal_vector
-
         return remaining_time, collision_point, new_velocity
