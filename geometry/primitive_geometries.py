@@ -63,6 +63,7 @@ class PrimitiveGeometries:
 
 
     def filled_polygon(self, points: list, material: Material):
+        self.topology.materials[material.color] = material
         points = [vec_real_to_matrix(self.topology.convert_factor, point) for point in points]
         self._filled_non_convex_polygon(points, material)
 

@@ -24,10 +24,9 @@ class Topology:
         self.edge_points = None
         self.convert_factor = np.divide(self.resolution, self.box_size)
         self.drawer = PrimitiveGeometries(self)
-        size = np.multiply(self.box_size, self.convert_factor).astype(int) - 1
-        # self.drawer.rectangle(np.array([0, 0]), size, (255, 255, 255))
         self.particles = particles
         self.set_particles_topology()
+        self.materials = dict()
 
 
     def set_particles_topology(self):

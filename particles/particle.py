@@ -24,10 +24,35 @@ class Particle:
         self.box = np.zeros(self.topology.geometry.shape)
 
 
-    def set_initial_conditions(self, position, velocity):
+    def external_set_initial_conditions(self, position, velocity):
         self.position = position
         self.velocity = velocity
         self._convert_particle_to_matrix()
+
+
+    def set_initial_conditions(self, electric_field):
+        self.set_initial_position()
+        self.set_initial_velocity(electric_field)
+
+
+    def set_initial_position(self):
+        max_random_number = self.topology.resolution[0]
+        random_init_pos = np.random.randint(max_random_number, size=2)
+        material = self.topology.geometry[tuple(random_init_pos)]
+        while material <= 1:
+            random_init_pos = np.random.randint(max_random_number, size=2)
+            material = self.topology.geometry[tuple(random_init_pos)]
+        self.position = random_init_pos
+        self.positions.append(self.position)
+
+
+    def set_initial_velocity(self, electric_field):
+        material = self.topology.materials[self.topology.geometry[tuple(self.position)]]
+        relax_time = material.relax_time
+        electron_mass = material.electron_mass
+        fermi_velocity = material.fermi_velocity
+        velocity = fermi_velocity + material.electron_charge * electric_field * relax_time/ electron_mass
+        return velocity
 
 
     def _convert_particle_to_matrix(self):

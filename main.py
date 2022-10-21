@@ -7,21 +7,21 @@ import numpy as np
 
 if __name__ == '__main__':
     particle = Particle(1, 1)
-    topology = Topology(particles=[particle], x_resolution=400, y_resolution=400)
+    topology = Topology(particles=[particle], x_box=3000, y_box=3000, x_resolution=800, y_resolution=800, scale='u')
     #                                                      x   y               vx   vy
-    topology.particles[0].set_initial_conditions(np.array([1, 5]), np.array([0, 10]))
+    topology.particles[0].external_set_initial_conditions(np.array([1200, 1200]), np.array([-1200, 953]))
     window = Window(topology)
-    a = [1, 1]
-    b = [1, 6]
-    c = [4, 6]
-    d = [4, 1]
-    e = [6, 4]
-    f = [6, 3]
-    g = [6, 6]
-    h = [6, 1]
-    i = [10, 1]
-    j = [10, 6]
-    contours = np.array([a, b, c, e, g, j, i, h, f, d])
+    a = [1000, 1000]
+    b = [1000, 2000]
+    c = [1500, 2000]
+    f = [1960, 1450]
+    g = [1960, 1550]
+    h = [1500, 1000]
+    i = [1960, 2000]
+    j = [1960, 1000]
+    k = [2460, 1000]
+    l = [2460, 2000]
+    contours = np.array([a, b, c, g, i, l, k, j, f, h])
     material = Material(10, color=60)
     # a = [1, 1]
     # b = [1, 6]
@@ -34,8 +34,8 @@ if __name__ == '__main__':
     # topology.drawer.line([3, 1], [3, 16], material)
     topology.drawer.filled_polygon([contours], material=material)
     topology.get_edges()
-    particle.move(delta_t=1)
+    particle.move(delta_t=10)
     topology.insert_particles(material_draw, 'arrow')
-    print(particle.positions / topology.convert_factor)
-    print(particle.velocities / topology.convert_factor)
+    # print(particle.positions / topology.convert_factor)
+    # print(particle.velocities / topology.convert_factor)
     window.create_window('Diode')
