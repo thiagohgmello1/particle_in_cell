@@ -93,12 +93,11 @@ class Particle:
 
 
     def find_collision_point(self, init_point, end_point, velocity):
-        edge_points = np.transpose(np.nonzero(self.topology.edges))
+        edge_points = self.topology.edge_points
         box = self.box.copy()
-
         cv2.line(box, init_point, end_point, color=(1, 1, 1), thickness=1)
         internal_path = np.multiply(box, self.topology.geometry)
-        external_path = np.multiply(box, self.topology.geometry)
+        external_path = np.multiply(box, self.topology.inv_geometry)
         internal_path = (internal_path / np.amax(internal_path, initial=1)).astype(int)
         external_path = (external_path / np.amax(external_path, initial=1)).astype(int)
         contact_points = np.flip(np.transpose(np.nonzero(external_path)), 1)
@@ -107,9 +106,10 @@ class Particle:
         contact_points = np.array([contact_points[0], contact_points[-1]])
         distance_from_init_point = np.linalg.norm(contact_points - init_point, axis=1)
         external_collision_point = contact_points[np.argmin(distance_from_init_point)]
-        collision_point = self.get_collision_point(internal_path, external_collision_point)
+        collision_point = self.get_collision_point(internal_path, external_collision_point, init_point)
         normal_vector = self.get_normal_vector(edge_points, collision_point, velocity)
         return True, normal_vector, collision_point
+
 
     def get_normal_vector(self, edge_points, collision_point, velocity):
         closer_points = self.get_closer_points(edge_points, collision_point)
@@ -120,12 +120,19 @@ class Particle:
         return normal_vector.astype(int)
 
 
-    def get_collision_point(self, internal_path, external_collision_point):
+    @staticmethod
+    def get_collision_point(internal_path, external_collision_point, init_point):
         external_collision_point = np.flip(external_collision_point)
         internal_path = np.transpose(np.nonzero(internal_path))
-        closer_point_index = spatial.KDTree(internal_path).query(external_collision_point)[1]
-        desired_point = internal_path[closer_point_index]
-        return np.flip(desired_point)
+        dist, closer_points_index = spatial.KDTree(internal_path).query(external_collision_point, k=2)
+        if dist[0] == dist[1]:
+            closer_points = internal_path[closer_points_index]
+            desired_point = closer_points[spatial.KDTree(closer_points).query(init_point)[1]]
+            return np.flip(desired_point)
+        else:
+            closer_point_index = closer_points_index[np.argmin(dist)]
+            desired_point = internal_path[closer_point_index]
+            return np.flip(desired_point)
 
 
     @staticmethod

@@ -7,9 +7,9 @@ import numpy as np
 
 if __name__ == '__main__':
     particle = Particle(1, 1)
-    topology = Topology(particles=[particle])
+    topology = Topology(particles=[particle], x_resolution=400, y_resolution=400)
     #                                                      x   y               vx   vy
-    topology.particles[0].set_initial_conditions(np.array([3.5, 5]), np.array([-21, -36]))
+    topology.particles[0].set_initial_conditions(np.array([1, 5]), np.array([0, 10]))
     window = Window(topology)
     a = [1, 1]
     b = [1, 6]
@@ -28,7 +28,7 @@ if __name__ == '__main__':
     # c = [6, 6]
     # d = [6, 1]
     # contours = np.array([a, b, c, d])
-    material_draw = Material(1, color=60)
+    material_draw = Material(1, color=255)
     # topology.drawer.circle(np.array([4, 6]), 3, material)
     # topology.drawer.line([1, 1], [1, 18], material)
     # topology.drawer.line([3, 1], [3, 16], material)

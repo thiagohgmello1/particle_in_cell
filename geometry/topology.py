@@ -19,7 +19,9 @@ class Topology:
         self.resolution = np.array([x_resolution, y_resolution])
         self.unit = self.convert_unit(scale)
         self.geometry = np.ones((x_resolution, y_resolution), dtype="uint8")
+        self.inv_geometry = None
         self.edges = np.zeros((x_resolution, y_resolution), dtype="uint8")
+        self.edge_points = None
         self.convert_factor = np.divide(self.resolution, self.box_size)
         self.drawer = PrimitiveGeometries(self)
         size = np.multiply(self.box_size, self.convert_factor).astype(int) - 1
@@ -47,11 +49,13 @@ class Topology:
 
 
     def get_edges(self):
+        self.inv_geometry = 1 / self.geometry
         ret, thresh_img = cv2.threshold(self.geometry, 10, 255, cv2.THRESH_BINARY)
         contours, hierarchy = cv2.findContours(
             image=thresh_img, mode=cv2.RETR_TREE, method=cv2.CHAIN_APPROX_SIMPLE
         )
         cv2.drawContours(self.edges, contours, -1, (255, 255, 255), 1)
+        self.edge_points = np.transpose(np.nonzero(self.edges))
 
     @staticmethod
     def convert_unit(unit: str):
